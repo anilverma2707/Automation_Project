@@ -17,3 +17,18 @@ service apache2 status
 tar -cvf /tmp/${myname}-httpd-logs-${timestamp}.tar /var/log/apache2/*.log
 
 aws s3 cp /tmp/${myname}-httpd-logs-${timestamp}.tar s3://${s3_bucket}/${myname}-httpd-logs-${timestamp}.tar
+
+FILE=/var/www/html/inventory.html
+
+if [ ! -f "$FILE" ]; then
+    echo 'LogType	TimeCreated		Type	Size' >> $FILE
+fi
+
+filesize=$(find "$FILE" -printf "%s")
+
+echo 'httpd-logs	$timestamp		tar		$filesize' >>$FILE
+
+automationfile=/etc/cron.d/automation
+if [ ! -f "$automationfile" ]; then
+    echo '5 0 * * * root /root/Automation_Project/automation.sh' >> $automationfile
+fi
